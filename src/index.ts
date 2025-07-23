@@ -1,15 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { Command } = require('commander');
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import { Command } from 'commander';
+import { Task, Config } from './types';
 
-class PonDo {
+export class PonDo {
+  private config: Config;
+
   constructor() {
-    this.configDir = path.join(os.homedir(), '.pondo');
-    this.tasksFile = path.join(this.configDir, 'tasks.json');
+    this.config = {
+      configDir: path.join(os.homedir(), '.pondo'),
+      tasksFile: path.join(os.homedir(), '.pondo', 'tasks.json')
+    };
   }
 
-  run() {
+  run(): void {
     const program = new Command();
     const packageJson = require('../package.json');
 
@@ -28,7 +33,7 @@ class PonDo {
     program
       .command('add <task>')
       .description('Add a new task')
-      .action((task) => {
+      .action((task: string) => {
         this.add(task);
       });
 
@@ -43,39 +48,39 @@ class PonDo {
     program
       .command('done <id>')
       .description('Mark task as done')
-      .action((id) => {
+      .action((id: string) => {
         this.done(id);
       });
 
     program.parse();
   }
 
-  init() {
+  private init(): void {
     try {
-      const configExists = fs.existsSync(this.configDir);
-      const tasksExists = fs.existsSync(this.tasksFile);
+      const configExists = fs.existsSync(this.config.configDir);
+      const tasksExists = fs.existsSync(this.config.tasksFile);
       
       if (configExists && tasksExists) {
-        console.log(`⚠️  pondo is already initialized in ${this.configDir}`);
+        console.log(`⚠️  pondo is already initialized in ${this.config.configDir}`);
         return;
       }
       
       if (!configExists) {
-        fs.mkdirSync(this.configDir, { recursive: true });
+        fs.mkdirSync(this.config.configDir, { recursive: true });
       }
       
       if (!tasksExists) {
-        fs.writeFileSync(this.tasksFile, JSON.stringify([], null, 2));
+        fs.writeFileSync(this.config.tasksFile, JSON.stringify([], null, 2));
       }
       
-      console.log(`✅ Initialized pondo in ${this.configDir}`);
+      console.log(`✅ Initialized pondo in ${this.config.configDir}`);
     } catch (error) {
-      console.error(`❌ Failed to initialize: ${error.message}`);
+      console.error(`❌ Failed to initialize: ${(error as Error).message}`);
       process.exit(1);
     }
   }
 
-  add(taskName) {
+  private add(taskName: string): void {
     if (!taskName.trim()) {
       console.error('❌ Task name is required');
       return;
@@ -83,7 +88,7 @@ class PonDo {
 
     try {
       const tasks = this.loadTasks();
-      const newTask = {
+      const newTask: Task = {
         id: this.generateId(),
         name: taskName.trim(),
         done: false,
@@ -95,11 +100,11 @@ class PonDo {
       
       console.log(`✅ Added task: ${newTask.name} (ID: ${newTask.id})`);
     } catch (error) {
-      console.error(`❌ Failed to add task: ${error.message}`);
+      console.error(`❌ Failed to add task: ${(error as Error).message}`);
     }
   }
 
-  list() {
+  private list(): void {
     try {
       const tasks = this.loadTasks();
       
@@ -115,11 +120,11 @@ class PonDo {
       });
       console.log();
     } catch (error) {
-      console.error(`❌ Failed to list tasks: ${error.message}`);
+      console.error(`❌ Failed to list tasks: ${(error as Error).message}`);
     }
   }
 
-  done(taskId) {
+  private done(taskId: string): void {
     if (!taskId) {
       console.error('❌ Task ID is required');
       return;
@@ -140,28 +145,24 @@ class PonDo {
       this.saveTasks(tasks);
       console.log(`✅ Marked task as done: ${task.name}`);
     } catch (error) {
-      console.error(`❌ Failed to mark task as done: ${error.message}`);
+      console.error(`❌ Failed to mark task as done: ${(error as Error).message}`);
     }
   }
 
-
-
-  loadTasks() {
-    if (!fs.existsSync(this.tasksFile)) {
+  private loadTasks(): Task[] {
+    if (!fs.existsSync(this.config.tasksFile)) {
       throw new Error('Tasks file not found. Run "pondo init" first.');
     }
     
-    const data = fs.readFileSync(this.tasksFile, 'utf8');
-    return JSON.parse(data);
+    const data = fs.readFileSync(this.config.tasksFile, 'utf8');
+    return JSON.parse(data) as Task[];
   }
 
-  saveTasks(tasks) {
-    fs.writeFileSync(this.tasksFile, JSON.stringify(tasks, null, 2));
+  private saveTasks(tasks: Task[]): void {
+    fs.writeFileSync(this.config.tasksFile, JSON.stringify(tasks, null, 2));
   }
 
-  generateId() {
+  private generateId(): string {
     return 'T' + Math.random().toString(36).substr(2, 3).toUpperCase();
   }
 }
-
-module.exports = { PonDo };

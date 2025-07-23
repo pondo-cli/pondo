@@ -2,11 +2,14 @@
   "name": "pondo",
   "version": "0.0.1",
   "description": "DuckDB-powered task management CLI for developers",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "bin": {
-    "pondo": "src/cli.js"
+    "pondo": "dist/cli.js"
   },
   "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -19,12 +22,16 @@
   "author": "kohei-takata",
   "license": "MIT",
   "files": [
-    "src/",
+    "dist/",
     "README.md",
     "LICENSE"
   ],
   "dependencies": {
     "commander": "^14.0.0"
   },
-  "preferGlobal": true
+  "preferGlobal": true,
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "typescript": "^5.8.3"
+  }
 }

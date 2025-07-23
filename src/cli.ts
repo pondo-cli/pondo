@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { PonDo } = require('./index.js');
+import { PonDo } from './index';
 
 const pondo = new PonDo();
 pondo.run();
