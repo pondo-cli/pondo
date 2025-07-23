@@ -149,7 +149,7 @@ describe('CLI Integration Tests', () => {
       const result = await runCLI(['--version']);
       
       expect(result.code).toBe(0);
-      expect(result.stdout.trim()).toBe('0.0.1');
+      expect(result.stdout.trim()).toBe('0.0.2');
     });
   });
 });
