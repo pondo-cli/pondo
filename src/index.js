@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { Command } = require('commander');
 
 class PonDo {
   constructor() {
@@ -9,29 +10,44 @@ class PonDo {
   }
 
   run() {
-    const args = process.argv.slice(2);
-    const command = args[0];
+    const program = new Command();
+    const packageJson = require('../package.json');
 
-    switch (command) {
-      case 'init':
+    program
+      .name('pondo')
+      .description('🦆 DuckDB-powered task management CLI for developers')
+      .version(packageJson.version, '-v, --version', 'Show version number');
+
+    program
+      .command('init')
+      .description('Initialize pondo in ~/.pondo')
+      .action(() => {
         this.init();
-        break;
-      case 'add':
-        this.add(args.slice(1).join(' '));
-        break;
-      case 'list':
+      });
+
+    program
+      .command('add <task>')
+      .description('Add a new task')
+      .action((task) => {
+        this.add(task);
+      });
+
+    program
+      .command('list')
+      .alias('ls')
+      .description('List all tasks')
+      .action(() => {
         this.list();
-        break;
-      case 'done':
-        this.done(args[1]);
-        break;
-      case '--version':
-      case '-v':
-        this.version();
-        break;
-      default:
-        this.help();
-    }
+      });
+
+    program
+      .command('done <id>')
+      .description('Mark task as done')
+      .action((id) => {
+        this.done(id);
+      });
+
+    program.parse();
   }
 
   init() {
@@ -128,29 +144,7 @@ class PonDo {
     }
   }
 
-  version() {
-    const packageJson = require('../package.json');
-    console.log(`pondo v${packageJson.version}`);
-  }
 
-  help() {
-    console.log(`
-🦆 pondo - DuckDB-powered task management CLI
-
-Usage:
-  pondo init                 Initialize pondo in ~/.pondo
-  pondo add "<task name>"    Add a new task
-  pondo list                 List all tasks
-  pondo done <id>            Mark task as done
-  pondo --version            Show version
-
-Examples:
-  pondo init
-  pondo add "Implement user authentication"
-  pondo list
-  pondo done T001
-`);
-  }
 
   loadTasks() {
     if (!fs.existsSync(this.tasksFile)) {

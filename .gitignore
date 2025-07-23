@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # IDE
 .idea
+
+# Claude Code documentation
+.claude/docs

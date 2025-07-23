@@ -23,6 +23,8 @@
     "README.md",
     "LICENSE"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "commander": "^14.0.0"
+  },
   "preferGlobal": true
 }
